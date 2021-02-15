@@ -371,7 +371,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
   }; 
   
   onMessage = (event: any) => {
-    this.props.onMessage && this.props.onMessage(event);
+    if (this.props.onMessage) this.props.onMessage(event);
   }  
 
   renderWebview = () => {
