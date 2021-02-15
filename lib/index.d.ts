@@ -106,7 +106,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
         shouldGetAccessToken: boolean;
     };
     state: State;
-    injectedOnLoad: boolean;
     webView: any;
     componentDidUpdate(nextProps: Props, nextState: State): void;
     onNavigationStateChange: ({ url }: any) => Promise<void>;
@@ -118,7 +117,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
     renderButton: () => JSX.Element;
     renderClose: () => {} | null | undefined;
     onLoadStart: () => void;
-    onLoadProgress: () => void;
     onMessage: (event: any) => void;
     renderWebview: () => JSX.Element | null;
     render(): JSX.Element;

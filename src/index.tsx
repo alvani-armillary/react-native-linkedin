@@ -240,7 +240,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
     authState: v4(),
     logout: false,
   }
-  injectedOnLoad = false;
   webView:any;
 
   componentDidUpdate(nextProps: Props, nextState: State) {
@@ -359,16 +358,11 @@ export default class LinkedInModal extends React.Component<Props, State> {
   }
 
   onLoadStart = () => {    
-    this.injectedOnLoad = false;
-  };
-
-  onLoadProgress = () => {
     const inject = this.props.injectedJavaScriptOnLoad;
-    if (!this.injectedOnLoad && inject) {        
-        this.webView.injectJavaScript(inject);
-        this.injectedOnLoad = true;
+    if (inject) {
+      this.webView.injectJavaScript(inject);
     }
-  }; 
+  };
   
   onMessage = (event: any) => {
     if (this.props.onMessage) {
@@ -394,7 +388,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
         sharedCookiesEnabled
         incognito={true}
         onLoadStart={this.onLoadStart}
-        onLoadProgress={this.onLoadProgress}
         onMessage={this.onMessage}
       />
     )
