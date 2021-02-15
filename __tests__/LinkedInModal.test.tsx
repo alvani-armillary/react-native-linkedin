@@ -14,8 +14,6 @@ import LinkedInModal, {
   onLoadStart,
 } from '../src'
 
-jest.mock('WebView', () => 'WebView')
-
 // @ts-ignore
 global.fetch = jest.fn().mockImplementation(
   () =>
