@@ -44,6 +44,7 @@ interface Props {
   authState?: string
   permissions: string[]
   linkText?: string
+  injectedJavaScriptOnLoad?: string,
   containerStyle?: any
   wrapperStyle?: any
   closeStyle?: any
@@ -56,11 +57,13 @@ interface Props {
   }
   shouldGetAccessToken?: boolean
   isDisabled?: boolean
+  preventCloseOnAuthorize?: boolean
   renderButton?(): ReactNode
   renderClose?(): ReactNode
   onOpen?(): void
   onClose?(): void
   onSignIn?(): void
+  onMessage?(e: any): void
   onSuccess(result: LinkedInToken): void
   onError(error: ErrorType): void
 }
@@ -207,6 +210,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
     onOpen: PropTypes.func,
     onClose: PropTypes.func,
     onSignIn: PropTypes.func,
+    onMessage: PropTypes.func,
     linkText: PropTypes.string,
     areaTouchText: PropTypes.object,
     renderButton: PropTypes.func,
@@ -216,6 +220,8 @@ export default class LinkedInModal extends React.Component<Props, State> {
     closeStyle: ViewPropTypes.style,
     animationType: PropTypes.string,
     shouldGetAccessToken: PropTypes.bool,
+    preventCloseOnAuthorize: PropTypes.bool,
+    injectedJavaScriptOnLoad: PropTypes.string,
   }
   static defaultProps = {
     onError: logError,
@@ -234,6 +240,8 @@ export default class LinkedInModal extends React.Component<Props, State> {
     authState: v4(),
     logout: false,
   }
+  injectedOnLoad = false;
+  webView:any;
 
   componentDidUpdate(nextProps: Props, nextState: State) {
     if (
@@ -250,9 +258,9 @@ export default class LinkedInModal extends React.Component<Props, State> {
     const { redirectUri, onError, shouldGetAccessToken } = this.props
 
     if (url.includes(redirectUri) && !raceCondition) {
-      const { onSignIn, onSuccess } = this.props
+      const { onSignIn, onSuccess, preventCloseOnAuthorize } = this.props
       const { authState } = this.state
-      this.setState({ modalVisible: false, raceCondition: true })
+      this.setState({ modalVisible: !!preventCloseOnAuthorize, raceCondition: true })
       if (onSignIn) {
         onSignIn()
       }
@@ -350,6 +358,22 @@ export default class LinkedInModal extends React.Component<Props, State> {
     )
   }
 
+  onLoadStart = () => {    
+    this.injectedOnLoad = false;
+  };
+
+  onLoadProgress = () => {
+    const inject = this.props.injectedJavaScriptOnLoad;
+    if (!this.injectedOnLoad && inject) {        
+        this.webView.injectJavaScript(inject);
+        this.injectedOnLoad = true;
+    }
+  }; 
+  
+  onMessage = (event: any) => {
+    this.props.onMessage && this.props.onMessage(event);
+  }  
+
   renderWebview = () => {
     const { modalVisible } = this.state
     if (!modalVisible) {
@@ -358,6 +382,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
 
     return (
       <WebView
+        ref={(ref:any) => this.webView = ref}
         source={{ uri: this.getAuthorizationUrl() }}
         onNavigationStateChange={this.onNavigationStateChange}
         startInLoadingState
@@ -366,6 +391,9 @@ export default class LinkedInModal extends React.Component<Props, State> {
         injectedJavaScript={injectedJavaScript}
         sharedCookiesEnabled
         incognito={true}
+        onLoadStart={this.onLoadStart}
+        onLoadProgress={this.onLoadProgress}
+        onMessage={this.onMessage}
       />
     )
   }
