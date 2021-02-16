@@ -28,6 +28,7 @@ interface Props {
     containerStyle?: any;
     wrapperStyle?: any;
     closeStyle?: any;
+    webViewRef?: any;
     animationType?: 'none' | 'fade' | 'slide';
     areaTouchText: {
         top?: number;
@@ -44,6 +45,8 @@ interface Props {
     onClose?(): void;
     onSignIn?(): void;
     onMessage?(e: any): void;
+    onLoadStart?(e: any): void;
+    onLoadEnd?(e: any): void;
     onSuccess(result: LinkedInToken): void;
     onError(error: ErrorType): void;
 }
@@ -77,6 +80,8 @@ export default class LinkedInModal extends React.Component<Props, State> {
         onClose: PropTypes.Requireable<(...args: any[]) => any>;
         onSignIn: PropTypes.Requireable<(...args: any[]) => any>;
         onMessage: PropTypes.Requireable<(...args: any[]) => any>;
+        onLoadStart: PropTypes.Requireable<(...args: any[]) => any>;
+        onLoadEnd: PropTypes.Requireable<(...args: any[]) => any>;
         linkText: PropTypes.Requireable<string>;
         areaTouchText: PropTypes.Requireable<object>;
         renderButton: PropTypes.Requireable<(...args: any[]) => any>;
@@ -88,6 +93,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
         shouldGetAccessToken: PropTypes.Requireable<boolean>;
         preventCloseOnAuthorize: PropTypes.Requireable<boolean>;
         injectedJavaScriptOnLoad: PropTypes.Requireable<string>;
+        webViewRef: PropTypes.Requireable<any>;
     };
     static defaultProps: {
         onError: (error: ErrorType) => void;
@@ -106,7 +112,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
         shouldGetAccessToken: boolean;
     };
     state: State;
-    webView: any;
     componentDidUpdate(nextProps: Props, nextState: State): void;
     onNavigationStateChange: ({ url }: any) => Promise<void>;
     getAuthorizationUrl: () => string;
@@ -116,7 +121,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
     logoutAsync: () => Promise<{}>;
     renderButton: () => JSX.Element;
     renderClose: () => {} | null | undefined;
-    onLoadStart: () => void;
     onMessage: (event: any) => void;
     renderWebview: () => JSX.Element | null;
     render(): JSX.Element;

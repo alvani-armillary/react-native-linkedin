@@ -48,6 +48,7 @@ interface Props {
   containerStyle?: any
   wrapperStyle?: any
   closeStyle?: any
+  webViewRef?:any
   animationType?: 'none' | 'fade' | 'slide'
   areaTouchText: {
     top?: number, 
@@ -64,6 +65,8 @@ interface Props {
   onClose?(): void
   onSignIn?(): void
   onMessage?(e: any): void
+  onLoadStart?(e: any): void
+  onLoadEnd?(e: any): void
   onSuccess(result: LinkedInToken): void
   onError(error: ErrorType): void
 }
@@ -211,6 +214,8 @@ export default class LinkedInModal extends React.Component<Props, State> {
     onClose: PropTypes.func,
     onSignIn: PropTypes.func,
     onMessage: PropTypes.func,
+    onLoadStart: PropTypes.func,
+    onLoadEnd: PropTypes.func,
     linkText: PropTypes.string,
     areaTouchText: PropTypes.object,
     renderButton: PropTypes.func,
@@ -222,6 +227,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
     shouldGetAccessToken: PropTypes.bool,
     preventCloseOnAuthorize: PropTypes.bool,
     injectedJavaScriptOnLoad: PropTypes.string,
+    webViewRef: PropTypes.any,
   }
   static defaultProps = {
     onError: logError,
@@ -239,8 +245,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
     modalVisible: false,
     authState: v4(),
     logout: false,
-  }
-  webView:any;
+  }  
 
   componentDidUpdate(nextProps: Props, nextState: State) {
     if (
@@ -356,13 +361,6 @@ export default class LinkedInModal extends React.Component<Props, State> {
       />
     )
   }
-
-  onLoadStart = () => {    
-    const inject = this.props.injectedJavaScriptOnLoad;
-    if (inject) {
-      this.webView.injectJavaScript(inject);
-    }
-  };
   
   onMessage = (event: any) => {
     if (this.props.onMessage) {
@@ -371,6 +369,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
   }  
 
   renderWebview = () => {
+    const { onLoadStart, onLoadEnd, onMessage, webViewRef } = this.props;
     const { modalVisible } = this.state
     if (!modalVisible) {
       return null
@@ -378,7 +377,7 @@ export default class LinkedInModal extends React.Component<Props, State> {
 
     return (
       <WebView
-        ref={(ref:any) => this.webView = ref}
+        ref={webViewRef}
         source={{ uri: this.getAuthorizationUrl() }}
         onNavigationStateChange={this.onNavigationStateChange}
         startInLoadingState
@@ -387,8 +386,9 @@ export default class LinkedInModal extends React.Component<Props, State> {
         injectedJavaScript={injectedJavaScript}
         sharedCookiesEnabled
         incognito={true}
-        onLoadStart={this.onLoadStart}
-        onMessage={this.onMessage}
+        onLoadStart={onLoadStart}
+        onLoadEnd={onLoadEnd}
+        onMessage={onMessage}
       />
     )
   }
